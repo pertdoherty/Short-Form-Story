@@ -15,6 +15,14 @@ This frontend project is built with Vite and is designed to be deployed from the
    - **Name**: `VITE_BACKEND_URL`
    - **Value**: the URL of your Railway backend (for example `https://<your-backend>.up.railway.app`)
 
+## Local frontend testing
+
+If you want to test the frontend locally with the backend running on `localhost:5000`, run:
+
+```bash
+VITE_BACKEND_URL=http://localhost:5000 npm run dev
+```
+
 ## Environment variables
 
 - The frontend now calls your backend at `VITE_BACKEND_URL`.

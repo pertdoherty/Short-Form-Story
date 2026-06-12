@@ -1,49 +1,79 @@
-# Vertex AI Studio Frontend App with Node.js Backend
+# Short Form Story Generator
 
-This repository contains a frontend and a Node.js backend, designed to run together.
-The backend acts as a proxy, handling Google Cloud API calls.
+This repository contains a Vite React frontend and a Node.js backend.
+The frontend is designed to deploy on Vercel, and the backend is designed to deploy on Railway.
 
-This project is intended for demonstration and prototyping purposes only.
-It is not intended for use in a production environment.
+## Architecture
 
-## Prerequisites
+* `frontend/` — Vite React app that calls the backend for story generation.
+* `backend/` — Express server that proxies requests to Gemini using your personal API key.
 
-To run this application locally, you need:
+## Local development
 
-*   **[Google Cloud SDK / gcloud CLI](https://cloud.google.com/sdk/docs/install)**: Follow the instructions to install the SDK.
+### Backend
 
-*   **gcloud Initialization**:
-    *   Initialize the gcloud CLI:
-        ```bash
-        gcloud init
-        ```
-    *   Authenticate for Application Default Credentials (needed to call Google Cloud APIs):
-        ```bash
-        gcloud auth application-default login
-        ```
+1. Copy `backend/env.sample` to `backend/.env`.
+2. Set your local env values, especially `GEMINI_API_KEY`.
+3. In `backend/`, install dependencies and run:
 
-*   **Node.js and npm**: Ensure you have Node.js and its package manager, `npm`, installed on your machine.
+```bash
+npm install
+npm run dev
+```
 
-## Project Structure
+### Frontend
 
-The project is organized into two main directories:
+1. In `frontend/`, install dependencies:
 
-*   `frontend/`: Contains the Frontend application code.
-*   `backend/`: Contains the Node.js/Express server code to proxy Google Cloud API calls.
+```bash
+npm install
+```
 
-## Backend Environment Variables
+2. Start the frontend locally with the backend URL:
 
-The `backend/.env.local` file is automatically generated when you download this application.
-It contains essential Google Cloud environment variables pre-configured based on your project settings at the time of download.
+```bash
+VITE_BACKEND_URL=http://localhost:5000 npm run dev
+```
 
-The variables set in `backend/.env.local` are:
-*   `API_BACKEND_PORT`: The port the backend API server listens on (e.g., `5000`).
-*   `API_PAYLOAD_MAX_SIZE`: The maximum size of the request payload accepted by the backend server (e.g., `5mb`).
-*   `GOOGLE_CLOUD_LOCATION`: The Google Cloud region associated with your project.
-*   `GOOGLE_CLOUD_PROJECT`: Your Google Cloud Project ID.
+## Railway backend setup
 
-**Note:** These variables are automatically populated during the download process.
-You can modify the values in `backend/.env.local` if you need to change them.
+1. In Railway, create a new project and connect this repository.
+2. Deploy the `backend/` folder as a Node.js service.
+3. Configure these environment variables in Railway:
+   * `GEMINI_API_KEY` = your Gemini API key
+   * `GEMINI_MODEL` = `gemini-2.5-flash`
+   * `ALLOWED_ORIGIN` = your Vercel frontend origin (for example `https://short-form-story-frontend.vercel.app`) or `*` for testing
+4. Deploy the backend service and copy the Railway public URL.
+
+## Vercel frontend setup
+
+1. In Vercel, create a new project from the same GitHub repo.
+2. Set the **Root Directory** to `frontend`.
+3. Configure build settings:
+   * Build Command: `npm run build`
+   * Output Directory: `dist`
+   * Framework Preset: `Vite`
+4. Add this environment variable in Vercel:
+   * `VITE_BACKEND_URL` = the Railway backend URL
+
+## Environment variables
+
+### Backend (Railway)
+
+* `GEMINI_API_KEY`
+* `GEMINI_MODEL`
+* `ALLOWED_ORIGIN`
+* `PORT` (Railway sets this automatically)
+
+### Frontend (Vercel)
+
+* `VITE_BACKEND_URL`
+
+## Notes
+
+* Do not commit `backend/.env.local`.
+* The backend `start` script now uses the runtime environment provided by Railway.
+* The frontend calls the backend via `VITE_BACKEND_URL`, keeping the Gemini key secret.
 
 ## Installation and Running the App
 

@@ -13,12 +13,13 @@ app.use(cors({ origin: allowedOrigin }));
 
 const API_KEY = process.env.GEMINI_API_KEY || process.env.API_KEY;
 const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
-if (!API_KEY) {
-  console.error('Error: Environment variable GEMINI_API_KEY must be set.');
-  process.exit(1);
+const aiAvailable = Boolean(API_KEY);
+
+if (!aiAvailable) {
+  console.error('Warning: Environment variable GEMINI_API_KEY is not set. The backend will start, but /api/generate will return an error until the key is configured.');
 }
 
-const ai = new GoogleGenAI({ apiKey: API_KEY, vertexai: true });
+const ai = aiAvailable ? new GoogleGenAI({ apiKey: API_KEY, vertexai: true }) : null;
 
 const buildPrompt = (params) => {
   const tone = params.tone?.trim() || 'neutral and engaging';
@@ -35,6 +36,10 @@ app.post('/api/generate', async (req, res) => {
   }
 
   try {
+    if (!aiAvailable || !ai) {
+      return res.status(500).json({ error: 'GEMINI_API_KEY is not configured on the backend.' });
+    }
+
     const prompt = buildPrompt({ concept, tone, quantity });
     const response = await ai.models.generateContent({
       model: MODEL,
