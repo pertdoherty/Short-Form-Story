@@ -1,26 +1,54 @@
 # Deploying to Vercel
 
-To deploy this application to Vercel using a Git repository, you need to configure your environment variables so the app can authenticate with the Gemini API.
+This frontend project is built with Vite and is designed to be deployed from the `frontend/` folder.
 
-## Setting the Gemini API Key in Vercel
+## Vercel setup
 
-1. Push your code to a GitHub, GitLab, or Bitbucket repository.
-2. Log in to your [Vercel Dashboard](https://vercel.com) and click **Add New... > Project**.
-3. Import your Git repository.
-4. Before clicking "Deploy", locate the **Environment Variables** section in the configuration screen.
-5. Add your Gemini API key:
-   - **Name**: `API_KEY`
-   - **Value**: `your_actual_gemini_api_key_here`
-6. Click **Deploy**.
+1. Push your code to GitHub and make sure the repo includes both `frontend/` and `backend/` if you want the full project history.
+2. In Vercel, click **Add New... > Project** and import your GitHub repository.
+3. Set the **Root Directory** to `frontend`.
+4. Configure the build settings:
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+   - **Framework Preset**: `Vite`
+5. Add any environment variables needed for your app.
 
-## ⚠️ Important Security Note for Production
+## Environment variables
 
-This codebase is currently structured as a pure client-side application for demonstration and sandbox purposes. It uses `process.env.API_KEY` directly in the frontend code (`services/geminiService.ts`). 
+- The current frontend code references `process.env.API_KEY` in `frontend/services/geminiService.ts`.
+- This is only safe for local testing. If you use this value in a production static build, the key may be exposed in the built bundle.
 
-**If you deploy this exactly as-is to a public static host, your API key will be exposed to anyone who inspects the browser's network tab or source code.**
+## Does the backend need to be on Git?
 
-To secure your API key in a real Vercel production environment, you should adapt the architecture:
+Yes, keep `backend/` in Git if you want the complete project and later want to deploy the backend as well.
 
-1. **Create a Vercel Serverless Function:** Create an `api/` directory at the root of your project. Move the Gemini API logic (`GoogleGenAI` initialization and `generateContent` call) into a serverless function like `api/generate.ts`. Vercel securely injects environment variables into these backend functions without exposing them to the browser.
-2. **Update the Frontend:** Change your React frontend (`App.tsx`) to make a standard `fetch('/api/generate', { method: 'POST', ... })` call to your new endpoint instead of calling the Gemini SDK directly.
-3. **Use a Build Tool:** Raw browser ESM (as used in this sandbox's `index.html`) does not natively understand `process.env`. When moving to Vercel, you typically wrap the React code in a framework like **Vite** or **Next.js**, which handles the build process and serverless function routing automatically.
+### Backend on Vercel?
+
+- A frontend-only Vercel deployment does not require the `backend/` folder to run.
+- But the current app is structured to use a backend proxy for Vertex AI calls, so if you want the app to work end-to-end, you need backend support somewhere.
+
+### Recommended approach
+
+Option 1: Frontend-only deploy
+- Deploy just `frontend/` to Vercel.
+- This is ideal for static frontend hosting.
+- Do not expect `/api-proxy` or `/ws-proxy` to work unless you also host a backend.
+
+Option 2: Full app support
+- Keep `backend/` in Git.
+- Deploy the backend separately on a Node-capable host, or convert it into Vercel Serverless Functions under `api/`.
+- Update the frontend to call the deployed backend endpoint instead of local `localhost:5000`.
+
+## Important note for this repo
+
+The current `frontend/vite.config.ts` uses development proxies:
+- `/api-proxy` → `http://localhost:5000`
+- `/ws-proxy` → `ws://localhost:5000`
+
+That proxy is only for local development. In Vercel production, there is no local backend unless you deploy it too.
+
+## Summary
+
+- If you want to deploy the frontend to Vercel, set root to `frontend`, build with `npm run build`, and output `dist`.
+- Keep `backend/` in Git if you want the full project and backend deployment path.
+- Do not commit `backend/.env.local`; it is ignored by `.gitignore`.
