@@ -8,13 +8,6 @@ export default defineConfig(({ mode }) => {
       define: {
         'process.env.API_KEY': JSON.stringify(apiKey),
       },
-      server: {
-        proxy: {
-          // Target your Node.js backend for local development.
-          '/api-proxy': 'http://localhost:5000',
-          '/ws-proxy': { target: 'ws://localhost:5000', ws: true },
-        },
-      },
       plugins: react(),
       resolve: {
         alias: {
