@@ -15,8 +15,14 @@ This frontend project is built with Vite and is designed to be deployed from the
 
 ## Environment variables
 
-- The current frontend code references `process.env.API_KEY` in `frontend/services/geminiService.ts`.
-- This is only safe for local testing. If you use this value in a production static build, the key may be exposed in the built bundle.
+- Add `API_KEY` in Vercel to match the client-side Gemini API key.
+- The frontend uses `process.env.API_KEY` in `frontend/services/geminiService.ts`.
+- This is functional but is not secure for production. A safer architecture is to move API calls to a backend endpoint.
+
+## New Vercel proxy support
+
+- This repo now includes a Vercel serverless proxy at `frontend/api/api-proxy.ts`.
+- Deployed frontend requests to Vertex AI can be forwarded through `/api-proxy` instead of relying on a local backend.
 
 ## Does the backend need to be on Git?
 

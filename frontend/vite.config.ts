@@ -3,17 +3,16 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), '');
+    const apiKey = env.API_KEY || process.env.API_KEY || '';
     return {
       define: {
-        // This is just generic value for the GEMINI API key.
-        // This is not used at all, and can be ignored!
-        'process.env.API_KEY' : JSON.stringify('api-key-this-is-not-used-can-be-ignored!'),
+        'process.env.API_KEY': JSON.stringify(apiKey),
       },
       server: {
         proxy: {
-          //Target your Node.js backend
+          // Target your Node.js backend for local development.
           '/api-proxy': 'http://localhost:5000',
-          '/ws-proxy': {target: 'ws://localhost:5000', ws: true},
+          '/ws-proxy': { target: 'ws://localhost:5000', ws: true },
         },
       },
       plugins: react(),
